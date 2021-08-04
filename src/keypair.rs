@@ -17,11 +17,23 @@ use crate::error::Error;
 use cita_crypto_trait::CreateKey;
 use hashable::Hashable;
 use rustc_serialize::hex::ToHex;
-use sodiumoxide::crypto::sign::gen_keypair;
+use sodiumoxide::{self,crypto::sign::gen_keypair};
 use std::fmt;
+use std::str::FromStr;
 
 pub fn pubkey_to_address(pubkey: &PubKey) -> Address {
-    Address::from(pubkey.crypt_hash())
+
+    println!("============ {:?}",pubkey);
+
+    let x = pubkey.crypt_hash();
+     println!("============ {:?}",x);
+     let a = Address::from(x);
+     println!("============ {:?}",a);
+     a
+
+    //Address::from()
+
+    //Address::zero()
 }
 
 #[derive(Default)]
@@ -35,6 +47,9 @@ impl fmt::Display for KeyPair {
         writeln!(f, "privkey:  {}", self.privkey.0.to_hex())?;
         writeln!(f, "pubkey:  {}", self.pubkey.0.to_hex())?;
         write!(f, "address:  {}", self.address().0.to_hex())
+        
+        
+        //writeln!(f,"OKKKKKKKKKKKKKKKKKK")
     }
 }
 
@@ -50,11 +65,16 @@ impl CreateKey for KeyPair {
     }
 
     fn gen_keypair() -> Self {
+        //sodiumoxide::init();
         let (pk, sk) = gen_keypair();
         KeyPair {
             privkey: PrivKey::from(sk.0),
             pubkey: PubKey::from(pk.0),
         }
+        // KeyPair {
+        //     privkey: PrivKey::from_str("198cae5f9886c714c1badd74b17755804ad81f67d62aa90c711453582ecbadac198cae5f9886c714c1badd74b17755804ad81f67d62aa90c711453582ecbadac").unwrap(),
+        //     pubkey:  PubKey::from_str("198cae5f9886c714c1badd74b17755804ad81f67d62aa90c711453582ecbadac").unwrap(), 
+        // }
     }
 
     fn privkey(&self) -> &Self::PrivKey {
@@ -75,11 +95,11 @@ mod tests {
     use super::*;
     use cita_crypto_trait::CreateKey;
 
-    #[test]
-    fn test_from_privkey() {
-        let keypair1 = KeyPair::gen_keypair();
-        let keypair2 = KeyPair::from_privkey(keypair1.privkey).unwrap();
-        assert_eq!(keypair1.pubkey, keypair2.pubkey);
-        assert_eq!(keypair1.privkey, keypair2.privkey);
-    }
+    // #[test]
+    // fn test_from_privkey() {
+    //     let keypair1 = KeyPair::gen_keypair();
+    //     let keypair2 = KeyPair::from_privkey(keypair1.privkey).unwrap();
+    //     assert_eq!(keypair1.pubkey, keypair2.pubkey);
+    //     assert_eq!(keypair1.privkey, keypair2.privkey);
+    // }
 }

@@ -24,8 +24,10 @@ pub struct Signer {
 impl From<PrivKey> for Signer {
     fn from(privkey: PrivKey) -> Self {
         let keypair = KeyPair::from_privkey(privkey).unwrap();
+
+        println!("impl From<PrivKey> for Signer --- {}",keypair);
         Signer {
-            address: keypair.address(),
+            address:Address::zero(), //keypair.address(),
             keypair,
         }
     }
@@ -33,15 +35,18 @@ impl From<PrivKey> for Signer {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::*;
     use cita_crypto_trait::CreateKey;
 
     #[test]
     fn test_signer() {
-        let keypair = KeyPair::gen_keypair();
-        let signer = Signer::from(keypair.privkey().clone());
-        assert_eq!(signer.keypair.privkey(), keypair.privkey());
-        assert_eq!(signer.keypair.pubkey(), keypair.pubkey());
-        assert_eq!(signer.address, keypair.address());
+         println!("test_signer ");
+          let keypair = KeyPair::gen_keypair();
+          println!("keypair {}",keypair);
+          let signer = Signer::from(keypair.privkey().clone());
+        //  assert_eq!(signer.keypair.privkey(), keypair.privkey());
+        //  assert_eq!(signer.keypair.pubkey(), keypair.pubkey());
+        //  assert_ne!(signer.address, keypair.address());
+        assert!(false);
     }
 }
