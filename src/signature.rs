@@ -24,7 +24,6 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use sodiumoxide::crypto::sign::{
     sign_detached, verify_detached, PublicKey as EdPublicKey, SecretKey, Signature as EdSignature,
 };
-use std::convert::TryFrom;
 
 use std::fmt;
 use std::ops::{Deref, DerefMut};
@@ -220,7 +219,7 @@ impl Sign for Signature {
         let sig = self.sig();
         let pubkey = self.pk();
         let is_valid = verify_detached(
-            &EdSignature::try_from(sig).unwrap(),
+            &EdSignature::from_slice(sig).unwrap(),
             message.as_ref(),
             &EdPublicKey::from_slice(pubkey.as_ref()).unwrap(),
         );
@@ -244,7 +243,7 @@ impl Sign for Signature {
         }
 
         let is_valid = verify_detached(
-            &EdSignature::try_from(sig).unwrap(),
+            &EdSignature::from_slice(sig).unwrap(),
             message.as_ref(),
             &EdPublicKey::from_slice(pubkey.as_ref()).unwrap(),
         );
