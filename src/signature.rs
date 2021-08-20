@@ -156,7 +156,7 @@ impl<'a> From<&'a [u8]> for Signature {
     fn from(slice: &'a [u8]) -> Signature {
         assert_eq!(slice.len(), SIGNATURE_BYTES_LEN);
         let mut bytes = [0u8; 96];
-        bytes.copy_from_slice(&slice[..]);
+        bytes.copy_from_slice(slice);
         Signature(bytes)
     }
 }
@@ -211,23 +211,27 @@ impl Sign for Signature {
         let sig = sign_detached(message.as_ref(), &secret_key);
 
         ret[0..64].copy_from_slice(sig.as_ref());
-        ret[64..96].copy_from_slice(&pubkey.as_ref());
+        ret[64..96].copy_from_slice(pubkey.as_ref());
         Ok(Signature(ret))
     }
 
     fn recover(&self, message: &Self::Message) -> Result<Self::PubKey, Self::Error> {
         let sig = self.sig();
         let pubkey = self.pk();
+
+        let mut sig_array = [0; 64];
+        sig_array.copy_from_slice(sig);
+
         let is_valid = verify_detached(
-            &EdSignature::from_slice(sig).unwrap(),
+            &EdSignature::new(sig_array),
             message.as_ref(),
-            &EdPublicKey::from_slice(pubkey.as_ref()).unwrap(),
+            &EdPublicKey::from_slice(pubkey).unwrap(),
         );
 
         if !is_valid {
             Err(Error::InvalidSignature)
         } else {
-            Ok(PubKey::from_slice(&pubkey))
+            Ok(PubKey::from_slice(pubkey))
         }
     }
 
@@ -238,12 +242,16 @@ impl Sign for Signature {
     ) -> Result<bool, Self::Error> {
         let sig = self.sig();
         let pk = self.pk();
+
+        let mut sig_array = [0; 64];
+        sig_array.copy_from_slice(sig);
+
         if pk != pubkey.as_ref() as &[u8] {
             return Err(Error::InvalidPubKey);
         }
 
         let is_valid = verify_detached(
-            &EdSignature::from_slice(sig).unwrap(),
+            &EdSignature::new(sig_array),
             message.as_ref(),
             &EdPublicKey::from_slice(pubkey.as_ref()).unwrap(),
         );
